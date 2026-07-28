@@ -30,21 +30,21 @@ class TaskUseCaseTest {
 
     @Test
     void shouldCreateAndListTasks() {
-        TaskResponse created = taskUseCase.createTask(new CreateTaskCommand("Write backend", "Spring Boot API"));
+        TaskResponse created = taskUseCase.create(new CreateTaskCommand("Write backend", "Spring Boot API"));
 
         assertThat(created.id()).isEqualTo(1L);
         assertThat(created.title()).isEqualTo("Write backend");
         assertThat(created.description()).isEqualTo("Spring Boot API");
         assertThat(created.completed()).isFalse();
 
-        assertThat(taskUseCase.listTasks())
+        assertThat(taskUseCase.findAll())
                 .extracting(TaskResponse::title)
                 .containsExactly("Write backend");
     }
 
     @Test
     void shouldUpdateTaskStatus() {
-        TaskResponse created = taskUseCase.createTask(new CreateTaskCommand("Deploy app", null));
+        TaskResponse created = taskUseCase.create(new CreateTaskCommand("Deploy app", null));
 
         TaskResponse updated = taskUseCase.updateStatus(created.id(), new UpdateTaskStatusCommand(true));
 
@@ -53,11 +53,20 @@ class TaskUseCaseTest {
 
     @Test
     void shouldDeleteTask() {
-        TaskResponse created = taskUseCase.createTask(new CreateTaskCommand("Remove item", null));
+        TaskResponse created = taskUseCase.create(new CreateTaskCommand("Remove item", null));
 
-        taskUseCase.deleteTask(created.id());
+        taskUseCase.delete(created.id());
 
-        assertThat(taskUseCase.listTasks()).isEmpty();
+        assertThat(taskUseCase.findAll()).isEmpty();
+    }
+
+    @Test
+    void shouldFindTaskById() {
+        TaskResponse created = taskUseCase.create(new CreateTaskCommand("Find item", null));
+
+        TaskResponse found = taskUseCase.findById(created.id());
+
+        assertThat(found.title()).isEqualTo("Find item");
     }
 
     @Test

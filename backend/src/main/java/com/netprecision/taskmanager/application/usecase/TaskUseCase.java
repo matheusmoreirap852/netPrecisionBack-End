@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class TaskUseCase {
+public class TaskUseCase implements BaseCrudUseCase<CreateTaskCommand, TaskResponse> {
 
     private final TaskRepository taskRepository;
     private final TaskFactory taskFactory;
@@ -22,14 +22,24 @@ public class TaskUseCase {
     }
 
     @Transactional(readOnly = true)
-    public List<TaskResponse> listTasks() {
+    @Override
+    public List<TaskResponse> findAll() {
         return taskRepository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @Transactional
-    public TaskResponse createTask(CreateTaskCommand command) {
+    @Override
+    public TaskResponse findById(Long id) {
+        return taskRepository.findById(id)
+                .map(this::toResponse)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+    }
+
+    @Transactional
+    @Override
+    public TaskResponse create(CreateTaskCommand command) {
         Task task = taskFactory.create(command.title(), command.description());
         return toResponse(taskRepository.save(task));
     }
@@ -43,7 +53,8 @@ public class TaskUseCase {
     }
 
     @Transactional
-    public void deleteTask(Long id) {
+    @Override
+    public void delete(Long id) {
         Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         taskRepository.delete(task);

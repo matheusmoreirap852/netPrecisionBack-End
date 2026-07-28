@@ -42,6 +42,13 @@ class TaskControllerIntegrationTest {
                 .extracting(TaskResponse::title)
                 .contains("Build API");
 
+        ResponseEntity<TaskResponse> foundResponse = restTemplate.getForEntity(
+                "/api/tasks/" + created.id(),
+                TaskResponse.class
+        );
+        assertThat(foundResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(Objects.requireNonNull(foundResponse.getBody()).title()).isEqualTo("Build API");
+
         ResponseEntity<TaskResponse> updatedResponse = restTemplate.exchange(
                 "/api/tasks/" + created.id() + "/status",
                 HttpMethod.PATCH,
