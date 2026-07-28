@@ -3,6 +3,8 @@ package com.netprecision.taskmanager.interfaces.rest;
 import com.netprecision.taskmanager.application.dto.IdentifiableResponse;
 import com.netprecision.taskmanager.application.usecase.BaseCrudUseCase;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -38,6 +40,10 @@ public abstract class BaseController<CreateRequest, CreateCommand, Response exte
     }
 
     @Operation(summary = "Criar registro", description = "Cria um novo registro para o recurso.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Registro criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados invalidos")
+    })
     @PostMapping
     public ResponseEntity<Response> create(@Valid @RequestBody CreateRequest request) {
         Response response = service.create(toCommand(request));
@@ -45,6 +51,10 @@ public abstract class BaseController<CreateRequest, CreateCommand, Response exte
     }
 
     @Operation(summary = "Excluir registro", description = "Remove um registro pelo identificador.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Registro removido com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Registro nao encontrado")
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

@@ -24,6 +24,7 @@ public class OpenApiConfig {
                                 .url("https://github.com/matheusmoreirap852/netPrecisionBack-End"))
                         .license(new License().name("MIT")))
                 .servers(List.of(
+                        new Server().url("/").description("Servidor atual"),
                         new Server().url("http://localhost:8080").description("Ambiente local"),
                         new Server().url("http://localhost:8082").description("Ambiente Docker alternativo")
                 ));

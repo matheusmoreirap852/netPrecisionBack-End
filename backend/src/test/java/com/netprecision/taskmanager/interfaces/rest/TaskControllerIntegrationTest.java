@@ -76,6 +76,8 @@ class TaskControllerIntegrationTest {
         assertThat(docsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(docsResponse.getBody())
                 .contains("\"title\":\"Task Manager API\"")
+                .contains("\"url\":\"/\"")
+                .contains("\"201\"")
                 .contains("/api/tasks")
                 .contains("/api/tasks/{id}/status");
     }
