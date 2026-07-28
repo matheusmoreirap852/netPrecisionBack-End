@@ -75,6 +75,50 @@ User: sa
 Password:
 ```
 
+## Como rodar com Docker
+
+Build da imagem:
+
+```bash
+docker build -t netprecision-task-manager-api ./backend
+```
+
+Executar container:
+
+```bash
+docker run --rm -p 8080:8080 --name netprecision-task-manager-api netprecision-task-manager-api
+```
+
+Tambem e possivel subir pela raiz do projeto com Docker Compose:
+
+```bash
+docker compose up --build
+```
+
+Para rodar em segundo plano:
+
+```bash
+docker compose up --build -d
+```
+
+Se a porta `8080` ja estiver em uso, informe outra porta para o host:
+
+```bash
+API_PORT=8082 docker compose up --build -d
+```
+
+Nesse caso a API ficara disponivel em:
+
+```text
+http://localhost:8082/api/tasks
+```
+
+Para parar:
+
+```bash
+docker compose down
+```
+
 ## Testes
 
 ```bash
