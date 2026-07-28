@@ -9,6 +9,7 @@ Backend do teste pratico Fullstack Angular/Spring: uma API REST para gerenciar t
 - Spring Web MVC
 - Spring Data JPA
 - Bean Validation
+- Springdoc OpenAPI / Swagger UI
 - H2 Database
 - JUnit 5
 - Maven Wrapper
@@ -118,6 +119,26 @@ Para parar:
 ```bash
 docker compose down
 ```
+
+## Swagger / OpenAPI
+
+A documentacao da API e gerada automaticamente com Springdoc OpenAPI.
+
+Com a aplicacao local na porta `8080`:
+
+```text
+Swagger UI: http://localhost:8080/swagger-ui.html
+OpenAPI JSON: http://localhost:8080/v3/api-docs
+```
+
+Com Docker usando `API_PORT=8082`:
+
+```text
+Swagger UI: http://localhost:8082/swagger-ui.html
+OpenAPI JSON: http://localhost:8082/v3/api-docs
+```
+
+O Swagger documenta os endpoints de tarefas, modelos de request/response e validacoes basicas expostas pela API.
 
 ## Testes
 

@@ -2,6 +2,7 @@ package com.netprecision.taskmanager.interfaces.rest;
 
 import com.netprecision.taskmanager.application.dto.IdentifiableResponse;
 import com.netprecision.taskmanager.application.usecase.BaseCrudUseCase;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
@@ -24,22 +25,26 @@ public abstract class BaseController<CreateRequest, CreateCommand, Response exte
         this.service = service;
     }
 
+    @Operation(summary = "Listar registros", description = "Retorna todos os registros do recurso.")
     @GetMapping
     public List<Response> getAll() {
         return service.findAll();
     }
 
+    @Operation(summary = "Buscar registro por id", description = "Retorna um registro especifico pelo identificador.")
     @GetMapping("/{id}")
     public Response getById(@PathVariable Long id) {
         return service.findById(id);
     }
 
+    @Operation(summary = "Criar registro", description = "Cria um novo registro para o recurso.")
     @PostMapping
     public ResponseEntity<Response> create(@Valid @RequestBody CreateRequest request) {
         Response response = service.create(toCommand(request));
         return ResponseEntity.created(URI.create(resourcePath() + "/" + response.id())).body(response);
     }
 
+    @Operation(summary = "Excluir registro", description = "Remove um registro pelo identificador.")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);

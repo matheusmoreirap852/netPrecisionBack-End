@@ -68,4 +68,15 @@ class TaskControllerIntegrationTest {
 
         assertThat(deletedResponse.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
     }
+
+    @Test
+    void shouldExposeOpenApiDocumentation() {
+        ResponseEntity<String> docsResponse = restTemplate.getForEntity("/v3/api-docs", String.class);
+
+        assertThat(docsResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(docsResponse.getBody())
+                .contains("\"title\":\"Task Manager API\"")
+                .contains("/api/tasks")
+                .contains("/api/tasks/{id}/status");
+    }
 }
