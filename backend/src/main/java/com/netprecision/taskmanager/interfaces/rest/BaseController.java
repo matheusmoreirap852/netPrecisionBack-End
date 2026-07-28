@@ -12,6 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+/**
+ * Base REST controller for simple CRUD resources.
+ * Concrete controllers keep only resource-specific mappings and request-to-command conversion.
+ */
 public abstract class BaseController<CreateRequest, CreateCommand, Response extends IdentifiableResponse> {
 
     private final BaseCrudUseCase<CreateCommand, Response> service;

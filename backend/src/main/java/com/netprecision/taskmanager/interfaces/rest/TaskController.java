@@ -14,6 +14,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Task endpoints reuse the generic CRUD behavior from BaseController.
+ * This class keeps only task-specific behavior, such as changing the completed status.
+ */
 @RestController
 @RequestMapping("/api/tasks")
 @CrossOrigin(origins = {"http://localhost:4200", "http://127.0.0.1:4200"})

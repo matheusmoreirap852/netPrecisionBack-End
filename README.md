@@ -31,6 +31,23 @@ Padroes aplicados:
 
 O objetivo e deixar a API facil de entender: a controller concreta fica pequena, a regra de negocio permanece no dominio/aplicacao, e a infraestrutura fica isolada nos adaptadores JPA.
 
+### Fluxo da requisicao
+
+```text
+Angular -> TaskController -> TaskUseCase -> TaskRepository -> JpaTaskRepositoryAdapter -> H2
+```
+
+### Descricao da base reutilizavel
+
+O `BaseController` concentra o CRUD comum (`GET`, `GET by id`, `POST` e `DELETE`). O `TaskController` herda essa base e implementa apenas a conversao de `CreateTaskRequest` para `CreateTaskCommand`, alem do endpoint especifico para alterar o status da tarefa.
+
+Essa escolha mostra POO de forma simples:
+
+- Heranca para reaproveitar comportamento comum.
+- Encapsulamento para manter a regra de negocio fora da controller.
+- Inversao de dependencia porque a controller chama um caso de uso, e nao acessa JPA diretamente.
+- Injecao de dependencia pelo construtor, deixando as dependencias explicitas e testaveis.
+
 ## Como rodar
 
 ```bash
