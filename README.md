@@ -147,6 +147,46 @@ cd backend
 ./mvnw test
 ```
 
+## CI/CD com GitHub Actions e EC2
+
+O projeto possui dois workflows em `.github/workflows`:
+
+- `backend-ci.yml`: valida a API com Maven e faz build da imagem Docker.
+- `deploy-ec2.yml`: conecta em uma EC2 por SSH, atualiza o repositorio e sobe a API com Docker Compose.
+
+Para o deploy funcionar, cadastre estes Secrets no GitHub em `Settings > Secrets and variables > Actions`:
+
+```text
+EC2_HOST=ip-publico-ou-dns-da-ec2
+EC2_USER=ubuntu
+EC2_SSH_KEY=conteudo-da-chave-privada-pem
+EC2_PROJECT_PATH=/home/ubuntu/netPrecisionBack-End
+```
+
+Opcionalmente, cadastre esta variable em `Variables`:
+
+```text
+API_PORT=8080
+```
+
+Na EC2, o servidor precisa ter:
+
+- Git
+- Docker
+- Docker Compose
+- Repositorio clonado no caminho definido em `EC2_PROJECT_PATH`
+
+Exemplo de preparacao inicial na EC2:
+
+```bash
+sudo apt update
+sudo apt install -y git docker.io docker-compose-plugin
+sudo usermod -aG docker ubuntu
+git clone https://github.com/matheusmoreirap852/netPrecisionBack-End.git /home/ubuntu/netPrecisionBack-End
+```
+
+Depois disso, o deploy pode ser executado manualmente na aba `Actions > Deploy API to EC2`, escolhendo `developer` ou `main`. Push na branch `main` tambem dispara o deploy automaticamente.
+
 ## Endpoints
 
 ### Listar tarefas

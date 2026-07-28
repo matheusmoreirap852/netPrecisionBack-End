@@ -1,0 +1,60 @@
+name: Deploy API to EC2
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to deploy
+        required: true
+        default: developer
+        type: choice
+        options:
+          - developer
+          - main
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy Docker Compose on EC2
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH key
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$EC2_SSH_KEY" > ~/.ssh/ec2_key
+          chmod 600 ~/.ssh/ec2_key
+
+      - name: Trust EC2 host
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+        run: ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy application
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+          EC2_PROJECT_PATH: ${{ secrets.EC2_PROJECT_PATH }}
+          DEPLOY_BRANCH: ${{ github.event.inputs.branch || github.ref_name }}
+          API_PORT: ${{ vars.API_PORT || '8080' }}
+        run: |
+          ssh -i ~/.ssh/ec2_key "$EC2_USER@$EC2_HOST" \
+            "EC2_PROJECT_PATH='$EC2_PROJECT_PATH' DEPLOY_BRANCH='$DEPLOY_BRANCH' API_PORT='$API_PORT' bash -s" <<'REMOTE_SCRIPT'
+          set -euo pipefail
+
+          cd "$EC2_PROJECT_PATH"
+          git fetch origin "$DEPLOY_BRANCH"
+          git checkout "$DEPLOY_BRANCH"
+          git pull --ff-only origin "$DEPLOY_BRANCH"
+
+          API_PORT="$API_PORT" docker compose up --build -d
+          docker compose ps
+
+          curl --fail --silent --show-error "http://localhost:${API_PORT}/v3/api-docs" > /dev/null
+          echo "Deploy finished successfully on port ${API_PORT}."
+          REMOTE_SCRIPT
