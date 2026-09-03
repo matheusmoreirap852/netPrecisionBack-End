@@ -1,5 +1,6 @@
 package com.netprecision.taskmanager.interfaces.rest.exception;
 
+import com.netprecision.taskmanager.application.security.AuthenticationException;
 import com.netprecision.taskmanager.application.usecase.TaskNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.OffsetDateTime;
@@ -29,6 +30,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TaskNotFoundException.class)
     public ResponseEntity<ApiError> handleNotFound(TaskNotFoundException exception, HttpServletRequest request) {
         return build(HttpStatus.NOT_FOUND, List.of(exception.getMessage()), request);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ApiError> handleAuthentication(AuthenticationException exception, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, List.of(exception.getMessage()), request);
     }
 
     private ResponseEntity<ApiError> build(HttpStatus status, List<String> messages, HttpServletRequest request) {

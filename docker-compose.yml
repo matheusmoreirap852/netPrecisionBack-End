@@ -5,8 +5,19 @@ services:
       dockerfile: Dockerfile
     container_name: netprecision-task-manager-api
     ports:
-      - "${API_PORT:-8080}:8080"
+      - "${API_PORT:-8082}:8080"
     environment:
       SPRING_H2_CONSOLE_SETTINGS_WEB_ALLOW_OTHERS: "true"
       JAVA_OPTS: "-XX:MaxRAMPercentage=75.0"
+    restart: unless-stopped
+
+  task-manager-web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: netprecision-task-manager-web
+    ports:
+      - "${WEB_PORT:-4200}:80"
+    depends_on:
+      - task-manager-api
     restart: unless-stopped

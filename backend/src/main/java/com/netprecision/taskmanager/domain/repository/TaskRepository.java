@@ -6,9 +6,9 @@ import java.util.Optional;
 
 public interface TaskRepository {
 
-    List<Task> findAll();
+    List<Task> findAllByUserId(Long userId);
 
-    Optional<Task> findById(Long id);
+    Optional<Task> findByIdAndUserId(Long id, Long userId);
 
     Task save(Task task);
 

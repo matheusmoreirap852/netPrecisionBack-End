@@ -25,7 +25,7 @@ class TaskUseCaseTest {
     @BeforeEach
     void setUp() {
         taskRepository = new InMemoryTaskRepository(new TaskFactory());
-        taskUseCase = new TaskUseCase(taskRepository, new TaskFactory());
+        taskUseCase = new TaskUseCase(taskRepository, new TaskFactory(), () -> 1L);
     }
 
     @Test
@@ -87,17 +87,19 @@ class TaskUseCaseTest {
         }
 
         @Override
-        public List<Task> findAll() {
+        public List<Task> findAllByUserId(Long userId) {
             return tasks.stream()
+                    .filter(task -> task.userId().equals(userId))
                     .sorted(Comparator.comparing(Task::id))
                     .map(this::copy)
                     .toList();
         }
 
         @Override
-        public Optional<Task> findById(Long id) {
+        public Optional<Task> findByIdAndUserId(Long id, Long userId) {
             return tasks.stream()
                     .filter(task -> task.id().equals(id))
+                    .filter(task -> task.userId().equals(userId))
                     .findFirst()
                     .map(this::copy);
         }
@@ -105,7 +107,7 @@ class TaskUseCaseTest {
         @Override
         public Task save(Task task) {
             Task saved = task.id() == null
-                    ? taskFactory.restore(sequence.incrementAndGet(), task.title(), task.description(), task.completed())
+                    ? taskFactory.restore(sequence.incrementAndGet(), task.userId(), task.title(), task.description(), task.completed())
                     : copy(task);
 
             tasks.removeIf(existing -> existing.id().equals(saved.id()));
@@ -119,7 +121,7 @@ class TaskUseCaseTest {
         }
 
         private Task copy(Task task) {
-            return taskFactory.restore(task.id(), task.title(), task.description(), task.completed());
+            return taskFactory.restore(task.id(), task.userId(), task.title(), task.description(), task.completed());
         }
     }
 }

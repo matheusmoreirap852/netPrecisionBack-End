@@ -18,6 +18,9 @@ public class TaskJpaEntity {
     @Column(nullable = false, length = 120)
     private String title;
 
+    @Column(nullable = false)
+    private Long userId;
+
     @Column(length = 500)
     private String description;
 
@@ -27,8 +30,9 @@ public class TaskJpaEntity {
     protected TaskJpaEntity() {
     }
 
-    public TaskJpaEntity(Long id, String title, String description, boolean completed) {
+    public TaskJpaEntity(Long id, Long userId, String title, String description, boolean completed) {
         this.id = id;
+        this.userId = userId;
         this.title = title;
         this.description = description;
         this.completed = completed;
@@ -40,6 +44,10 @@ public class TaskJpaEntity {
 
     public String getTitle() {
         return title;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 
     public String getDescription() {

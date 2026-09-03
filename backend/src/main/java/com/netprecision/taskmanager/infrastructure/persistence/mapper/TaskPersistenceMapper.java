@@ -15,10 +15,16 @@ public class TaskPersistenceMapper {
     }
 
     public Task toDomain(TaskJpaEntity entity) {
-        return taskFactory.restore(entity.getId(), entity.getTitle(), entity.getDescription(), entity.isCompleted());
+        return taskFactory.restore(
+                entity.getId(),
+                entity.getUserId(),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.isCompleted()
+        );
     }
 
     public TaskJpaEntity toEntity(Task task) {
-        return new TaskJpaEntity(task.id(), task.title(), task.description(), task.completed());
+        return new TaskJpaEntity(task.id(), task.userId(), task.title(), task.description(), task.completed());
     }
 }

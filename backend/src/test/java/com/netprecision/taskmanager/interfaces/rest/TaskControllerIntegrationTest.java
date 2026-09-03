@@ -2,16 +2,20 @@ package com.netprecision.taskmanager.interfaces.rest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.netprecision.taskmanager.application.dto.AuthResponse;
 import com.netprecision.taskmanager.application.dto.TaskResponse;
 import com.netprecision.taskmanager.interfaces.rest.dto.CreateTaskRequest;
+import com.netprecision.taskmanager.interfaces.rest.dto.RegisterRequest;
 import com.netprecision.taskmanager.interfaces.rest.dto.UpdateTaskStatusRequest;
 import java.util.Objects;
+import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.resttestclient.TestRestTemplate;
 import org.springframework.boot.resttestclient.autoconfigure.AutoConfigureTestRestTemplate;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +29,15 @@ class TaskControllerIntegrationTest {
 
     @Test
     void shouldCreateListUpdateAndDeleteTask() {
+        HttpHeaders headers = authHeaders();
+        HttpEntity<CreateTaskRequest> createRequest = new HttpEntity<>(
+                new CreateTaskRequest("Build API", "DDD task manager"),
+                headers
+        );
+
         ResponseEntity<TaskResponse> createdResponse = restTemplate.postForEntity(
                 "/api/tasks",
-                new CreateTaskRequest("Build API", "DDD task manager"),
+                createRequest,
                 TaskResponse.class
         );
 
@@ -36,14 +46,21 @@ class TaskControllerIntegrationTest {
         assertThat(created.id()).isNotNull();
         assertThat(created.completed()).isFalse();
 
-        ResponseEntity<TaskResponse[]> listResponse = restTemplate.getForEntity("/api/tasks", TaskResponse[].class);
+        ResponseEntity<TaskResponse[]> listResponse = restTemplate.exchange(
+                "/api/tasks",
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
+                TaskResponse[].class
+        );
         assertThat(listResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(Objects.requireNonNull(listResponse.getBody()))
                 .extracting(TaskResponse::title)
                 .contains("Build API");
 
-        ResponseEntity<TaskResponse> foundResponse = restTemplate.getForEntity(
+        ResponseEntity<TaskResponse> foundResponse = restTemplate.exchange(
                 "/api/tasks/" + created.id(),
+                HttpMethod.GET,
+                new HttpEntity<>(headers),
                 TaskResponse.class
         );
         assertThat(foundResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -52,7 +69,7 @@ class TaskControllerIntegrationTest {
         ResponseEntity<TaskResponse> updatedResponse = restTemplate.exchange(
                 "/api/tasks/" + created.id() + "/status",
                 HttpMethod.PATCH,
-                new HttpEntity<>(new UpdateTaskStatusRequest(true)),
+                new HttpEntity<>(new UpdateTaskStatusRequest(true), headers),
                 TaskResponse.class
         );
 
@@ -62,7 +79,7 @@ class TaskControllerIntegrationTest {
         ResponseEntity<Void> deletedResponse = restTemplate.exchange(
                 "/api/tasks/" + created.id(),
                 HttpMethod.DELETE,
-                HttpEntity.EMPTY,
+                new HttpEntity<>(headers),
                 Void.class
         );
 
@@ -80,5 +97,20 @@ class TaskControllerIntegrationTest {
                 .contains("\"201\"")
                 .contains("/api/tasks")
                 .contains("/api/tasks/{id}/status");
+    }
+
+    private HttpHeaders authHeaders() {
+        ResponseEntity<AuthResponse> response = restTemplate.postForEntity(
+                "/api/auth/register",
+                new RegisterRequest("Test User", "user-" + UUID.randomUUID() + "@example.com", "secret123"),
+                AuthResponse.class
+        );
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        String token = Objects.requireNonNull(response.getBody()).token();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(token);
+        return headers;
     }
 }

@@ -96,22 +96,30 @@ Tambem e possivel subir pela raiz do projeto com Docker Compose:
 docker compose up --build
 ```
 
+O Compose sobe dois servicos:
+
+- Backend Spring Boot em `http://localhost:8082/api/tasks` por padrao.
+- Frontend Angular/Nginx em `http://localhost:4200`.
+
+No build de producao, o frontend chama a API por `/api/tasks`. O Nginx encaminha essas requisicoes para o backend dentro da rede Docker, entao outras pessoas podem acessar o frontend pelo host publicado sem depender de `localhost` no navegador delas.
+
 Para rodar em segundo plano:
 
 ```bash
 docker compose up --build -d
 ```
 
-Se a porta `8080` ja estiver em uso, informe outra porta para o host:
+Se as portas padrao ja estiverem em uso, informe outras portas para o host:
 
 ```bash
-API_PORT=8082 docker compose up --build -d
+API_PORT=8083 WEB_PORT=4201 docker compose up --build -d
 ```
 
-Nesse caso a API ficara disponivel em:
+Nesse caso os servicos ficarao disponiveis em:
 
 ```text
-http://localhost:8082/api/tasks
+Frontend: http://localhost:4201
+API: http://localhost:8083/api/tasks
 ```
 
 Para parar:

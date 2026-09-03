@@ -3,6 +3,7 @@ package com.netprecision.taskmanager.application.usecase;
 import com.netprecision.taskmanager.application.dto.CreateTaskCommand;
 import com.netprecision.taskmanager.application.dto.TaskResponse;
 import com.netprecision.taskmanager.application.dto.UpdateTaskStatusCommand;
+import com.netprecision.taskmanager.application.security.AuthenticatedUserProvider;
 import com.netprecision.taskmanager.domain.model.Task;
 import com.netprecision.taskmanager.domain.repository.TaskRepository;
 import com.netprecision.taskmanager.domain.service.TaskFactory;
@@ -15,16 +16,23 @@ public class TaskUseCase implements BaseCrudUseCase<CreateTaskCommand, TaskRespo
 
     private final TaskRepository taskRepository;
     private final TaskFactory taskFactory;
+    private final AuthenticatedUserProvider authenticatedUserProvider;
 
-    public TaskUseCase(TaskRepository taskRepository, TaskFactory taskFactory) {
+    public TaskUseCase(
+            TaskRepository taskRepository,
+            TaskFactory taskFactory,
+            AuthenticatedUserProvider authenticatedUserProvider
+    ) {
         this.taskRepository = taskRepository;
         this.taskFactory = taskFactory;
+        this.authenticatedUserProvider = authenticatedUserProvider;
     }
 
     @Transactional(readOnly = true)
     @Override
     public List<TaskResponse> findAll() {
-        return taskRepository.findAll().stream()
+        Long userId = authenticatedUserProvider.currentUserId();
+        return taskRepository.findAllByUserId(userId).stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -32,7 +40,8 @@ public class TaskUseCase implements BaseCrudUseCase<CreateTaskCommand, TaskRespo
     @Transactional
     @Override
     public TaskResponse findById(Long id) {
-        return taskRepository.findById(id)
+        Long userId = authenticatedUserProvider.currentUserId();
+        return taskRepository.findByIdAndUserId(id, userId)
                 .map(this::toResponse)
                 .orElseThrow(() -> new TaskNotFoundException(id));
     }
@@ -40,13 +49,15 @@ public class TaskUseCase implements BaseCrudUseCase<CreateTaskCommand, TaskRespo
     @Transactional
     @Override
     public TaskResponse create(CreateTaskCommand command) {
-        Task task = taskFactory.create(command.title(), command.description());
+        Long userId = authenticatedUserProvider.currentUserId();
+        Task task = taskFactory.create(userId, command.title(), command.description());
         return toResponse(taskRepository.save(task));
     }
 
     @Transactional
     public TaskResponse updateStatus(Long id, UpdateTaskStatusCommand command) {
-        Task task = taskRepository.findById(id)
+        Long userId = authenticatedUserProvider.currentUserId();
+        Task task = taskRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         task.changeStatus(command.completed());
         return toResponse(taskRepository.save(task));
@@ -55,7 +66,8 @@ public class TaskUseCase implements BaseCrudUseCase<CreateTaskCommand, TaskRespo
     @Transactional
     @Override
     public void delete(Long id) {
-        Task task = taskRepository.findById(id)
+        Long userId = authenticatedUserProvider.currentUserId();
+        Task task = taskRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new TaskNotFoundException(id));
         taskRepository.delete(task);
     }

@@ -5,12 +5,14 @@ import java.util.Objects;
 public class Task {
 
     private final Long id;
+    private final Long userId;
     private final TaskTitle title;
     private final String description;
     private boolean completed;
 
-    public Task(Long id, TaskTitle title, String description, boolean completed) {
+    public Task(Long id, Long userId, TaskTitle title, String description, boolean completed) {
         this.id = id;
+        this.userId = Objects.requireNonNull(userId, "User is required");
         this.title = Objects.requireNonNull(title, "Title is required");
         this.description = normalizeDescription(description);
         this.completed = completed;
@@ -18,6 +20,10 @@ public class Task {
 
     public Long id() {
         return id;
+    }
+
+    public Long userId() {
+        return userId;
     }
 
     public String title() {

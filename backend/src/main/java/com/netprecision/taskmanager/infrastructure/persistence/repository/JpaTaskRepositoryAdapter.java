@@ -19,15 +19,15 @@ public class JpaTaskRepositoryAdapter implements TaskRepository {
     }
 
     @Override
-    public List<Task> findAll() {
-        return springDataTaskRepository.findAll().stream()
+    public List<Task> findAllByUserId(Long userId) {
+        return springDataTaskRepository.findAllByUserId(userId).stream()
                 .map(mapper::toDomain)
                 .toList();
     }
 
     @Override
-    public Optional<Task> findById(Long id) {
-        return springDataTaskRepository.findById(id)
+    public Optional<Task> findByIdAndUserId(Long id, Long userId) {
+        return springDataTaskRepository.findByIdAndUserId(id, userId)
                 .map(mapper::toDomain);
     }
 
